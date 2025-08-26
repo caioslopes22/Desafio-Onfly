@@ -1,0 +1,52 @@
+version: '3.9'
+services:
+  app:
+    build: ./backend
+    container_name: travel_api
+    depends_on: [db]
+    environment:
+      APP_ENV: local
+      APP_KEY: base64:placeholderkey=
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: travel
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      MAIL_MAILER: log
+      JWT_TTL: 60
+    volumes:
+      - ./backend:/var/www/html
+    ports: ['9000:9000']
+
+  web:
+    image: nginx:alpine
+    container_name: travel_nginx
+    depends_on: [app]
+    volumes:
+      - ./backend:/var/www/html
+      - ./backend/docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports: ['8080:80']
+
+  db:
+    image: mysql:8
+    container_name: travel_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: travel
+    ports: ['3307:3306']
+    volumes: ['db_data:/var/lib/mysql']
+
+  frontend:
+    build: ./frontend
+    container_name: travel_frontend
+    environment:
+      VITE_API_URL: http://localhost:8080/api
+    volumes: ['../frontend:/app']
+    ports: ['5173:5173']
+    command: ["npm","run","dev","--","--host"]
+
+volumes:
+  db_data:
