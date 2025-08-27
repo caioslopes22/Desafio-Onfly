@@ -1,12 +1,11 @@
-version: '3.9'
 services:
   app:
     build: ./backend
     container_name: travel_api
-    depends_on: [db]
+    depends_on:
+      - db
     environment:
       APP_ENV: local
-      APP_KEY: base64:placeholderkey=
       APP_DEBUG: 'true'
       APP_URL: http://localhost
       DB_CONNECTION: mysql
@@ -17,19 +16,19 @@ services:
       DB_PASSWORD: root
       MAIL_MAILER: log
       JWT_TTL: 60
-    working_dir: /laravel
+    working_dir: /var/www/html
     volumes:
-      - ./backend/laravel:/laravel
-      - ./backend/custom:/tmp/custom
+      - ./backend/laravel:/var/www/html
     ports:
       - "9000:9000"
 
   web:
     image: nginx:alpine
     container_name: travel_nginx
-    depends_on: [app]
+    depends_on:
+      - app
     volumes:
-      - ./backend/laravel:/laravel
+      - ./backend/laravel:/var/www/html
       - ./backend/docker/nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
       - "8080:80"
